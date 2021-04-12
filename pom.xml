@@ -13,6 +13,7 @@
 		<version>2.3.2.RELEASE</version>
 		<relativePath />
 	</parent>
+
 	<scm>
 		<url>https://github.com/spring-cloud/spring-cloud-netflix</url>
 		<connection>scm:git:git://github.com/spring-cloud/spring-cloud-netflix.git</connection>

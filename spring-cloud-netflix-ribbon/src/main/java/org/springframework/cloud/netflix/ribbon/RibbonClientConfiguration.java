@@ -100,6 +100,11 @@ public class RibbonClientConfiguration {
 	@Autowired
 	private Environment environment;
 
+	/**
+	 * ribbon的IClientConfig，这里是DefaultClientConfigImpl
+	 *
+	 * @return IClientConfig
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public IClientConfig ribbonClientConfig() {
@@ -119,10 +124,12 @@ public class RibbonClientConfiguration {
 
 	private Integer getProperty(IClientConfigKey<Integer> connectTimeout,
 	                            int defaultConnectTimeout) {
-		return environment.getProperty("ribbon." + connectTimeout, Integer.class,
-				defaultConnectTimeout);
+		return environment.getProperty("ribbon." + connectTimeout, Integer.class, defaultConnectTimeout);
 	}
 
+	/**
+	 * ribbon的IRule，这里使用的是ZoneAvoidanceRule
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public IRule ribbonRule(IClientConfig config) {
@@ -134,6 +141,9 @@ public class RibbonClientConfiguration {
 		return rule;
 	}
 
+	/**
+	 * ribbon的Ping，这里是DummyPing
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public IPing ribbonPing(IClientConfig config) {
@@ -143,6 +153,9 @@ public class RibbonClientConfiguration {
 		return new DummyPing();
 	}
 
+	/**
+	 * ribbon的ServerList<Server>，这里是ConfigurationBasedServerList
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	@SuppressWarnings("unchecked")
@@ -155,12 +168,18 @@ public class RibbonClientConfiguration {
 		return serverList;
 	}
 
+	/**
+	 * ribbon的ServerListUpdater，这里是PollingServerListUpdater
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public ServerListUpdater ribbonServerListUpdater(IClientConfig config) {
 		return new PollingServerListUpdater(config);
 	}
 
+	/**
+	 * ribbon的ILoadBalancer，这里是ZoneAwareLoadBalancer
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public ILoadBalancer ribbonLoadBalancer(IClientConfig config,
@@ -175,6 +194,9 @@ public class RibbonClientConfiguration {
 		return new ZoneAwareLoadBalancer<>(config, rule, ping, serverList, serverListFilter, serverListUpdater);
 	}
 
+	/**
+	 * ribbon，ServerListFilter<Server>，这里是ZonePreferenceServerListFilter
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	@SuppressWarnings("unchecked")
@@ -189,12 +211,7 @@ public class RibbonClientConfiguration {
 	}
 
 	/**
-	 * 注入RibbonLoadBalancerContext bean
-	 *
-	 * @param loadBalancer ribbon的负载均衡器
-	 * @param config       ribbon的配置器
-	 * @param retryHandler ribbon的重试处理器
-	 * @return RibbonLoadBalancerContext
+	 * ribbon的RibbonLoadBalancerContext
 	 */
 	@Bean
 	@ConditionalOnMissingBean
@@ -204,6 +221,9 @@ public class RibbonClientConfiguration {
 		return new RibbonLoadBalancerContext(loadBalancer, config, retryHandler);
 	}
 
+	/**
+	 * ribbon RetryHandler，这里是DefaultLoadBalancerRetryHandler
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public RetryHandler retryHandler(IClientConfig config) {

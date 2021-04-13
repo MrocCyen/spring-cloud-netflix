@@ -35,6 +35,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @author Spencer Gibb
  * @author Dave Syer
  */
+
+/**
+ * 为每一个客户端都设置一个上下文
+ */
 public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecification> {
 
 	static final String NAMESPACE = "ribbon";
@@ -45,9 +49,10 @@ public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecifi
 
 	/**
 	 * Get the rest client associated with the name.
-	 * @param name name to search by
+	 *
+	 * @param name        name to search by
 	 * @param clientClass the class of the client bean
-	 * @param <C> {@link IClient} subtype
+	 * @param <C>         {@link IClient} subtype
 	 * @return {@link IClient} instance
 	 * @throws RuntimeException if any error occurs
 	 */
@@ -57,6 +62,7 @@ public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecifi
 
 	/**
 	 * Get the load balancer associated with the name.
+	 *
 	 * @param name name to search by
 	 * @return {@link ILoadBalancer} instance
 	 * @throws RuntimeException if any error occurs
@@ -67,6 +73,7 @@ public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecifi
 
 	/**
 	 * Get the client config associated with the name.
+	 *
 	 * @param name name to search by
 	 * @return {@link IClientConfig} instance
 	 * @throws RuntimeException if any error occurs
@@ -77,6 +84,7 @@ public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecifi
 
 	/**
 	 * Get the load balancer context associated with the name.
+	 *
 	 * @param serviceId id of the service to search by
 	 * @return {@link RibbonLoadBalancerContext} instance
 	 * @throws RuntimeException if any error occurs
@@ -85,19 +93,20 @@ public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecifi
 		return getInstance(serviceId, RibbonLoadBalancerContext.class);
 	}
 
-	static <C> C instantiateWithConfig(Class<C> clazz, IClientConfig config) {
+	static <C> C instantiateWithConfig(Class<C> clazz,
+	                                   IClientConfig config) {
 		return instantiateWithConfig(null, clazz, config);
 	}
 
 	static <C> C instantiateWithConfig(AnnotationConfigApplicationContext context,
-			Class<C> clazz, IClientConfig config) {
+	                                   Class<C> clazz,
+	                                   IClientConfig config) {
 		C result = null;
 
 		try {
 			Constructor<C> constructor = clazz.getConstructor(IClientConfig.class);
 			result = constructor.newInstance(config);
-		}
-		catch (Throwable e) {
+		} catch (Throwable e) {
 			// Ignored
 		}
 
@@ -118,10 +127,12 @@ public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecifi
 
 	@Override
 	public <C> C getInstance(String name, Class<C> type) {
+		//从容器中获取bean
 		C instance = super.getInstance(name, type);
 		if (instance != null) {
 			return instance;
 		}
+		//如果获取bean失败，则通过配置信息查找
 		IClientConfig config = getInstance(name, IClientConfig.class);
 		return instantiateWithConfig(getContext(name), type, config);
 	}

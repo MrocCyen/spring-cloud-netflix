@@ -59,18 +59,15 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @Conditional(RibbonAutoConfiguration.RibbonClassesConditions.class)
 @RibbonClients
-@AutoConfigureAfter(
-		name = "org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration")
-@AutoConfigureBefore({ LoadBalancerAutoConfiguration.class,
-		AsyncLoadBalancerAutoConfiguration.class })
-@EnableConfigurationProperties({ RibbonEagerLoadProperties.class,
-		ServerIntrospectorProperties.class })
-@ConditionalOnProperty(value = "spring.cloud.loadbalancer.ribbon.enabled",
-		havingValue = "true", matchIfMissing = true)
+@AutoConfigureAfter(name = "org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration")
+@AutoConfigureBefore({LoadBalancerAutoConfiguration.class, AsyncLoadBalancerAutoConfiguration.class})
+@EnableConfigurationProperties({RibbonEagerLoadProperties.class, ServerIntrospectorProperties.class})
+@ConditionalOnProperty(value = "spring.cloud.loadbalancer.ribbon.enabled", havingValue = "true", matchIfMissing = true)
 public class RibbonAutoConfiguration {
 
 	@Autowired(required = false)
 	private List<RibbonClientSpecification> configurations = new ArrayList<>();
+
 	@Autowired
 	private RibbonEagerLoadProperties ribbonEagerLoadProperties;
 
@@ -79,25 +76,41 @@ public class RibbonAutoConfiguration {
 		return HasFeatures.namedFeature("Ribbon", Ribbon.class);
 	}
 
+	/**
+	 * SpringClientFactory bean
+	 *
+	 * @return SpringClientFactory
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public SpringClientFactory springClientFactory() {
 		SpringClientFactory factory = new SpringClientFactory();
+		//注入bean配置信息
 		factory.setConfigurations(this.configurations);
 		return factory;
 	}
 
+	/**
+	 * ribbon中LoadBalancerClient实现的bean
+	 *
+	 * @return
+	 */
 	@Bean
 	@ConditionalOnMissingBean(LoadBalancerClient.class)
 	public LoadBalancerClient loadBalancerClient() {
 		return new RibbonLoadBalancerClient(springClientFactory());
 	}
 
+	/**
+	 * 重试工厂bean，在LoadBalancerAutoConfiguration之前加载
+	 *
+	 * @param clientFactory SpringClientFactory
+	 * @return
+	 */
 	@Bean
 	@ConditionalOnClass(name = "org.springframework.retry.support.RetryTemplate")
 	@ConditionalOnMissingBean
-	public LoadBalancedRetryFactory loadBalancedRetryPolicyFactory(
-			final SpringClientFactory clientFactory) {
+	public LoadBalancedRetryFactory loadBalancedRetryPolicyFactory(final SpringClientFactory clientFactory) {
 		return new RibbonLoadBalancedRetryFactory(clientFactory);
 	}
 
@@ -138,7 +151,7 @@ public class RibbonAutoConfiguration {
 
 	// TODO: support for autoconfiguring restemplate to use apache http client or okhttp
 
-	@Target({ ElementType.TYPE, ElementType.METHOD })
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	@Conditional(OnRibbonRestClientCondition.class)

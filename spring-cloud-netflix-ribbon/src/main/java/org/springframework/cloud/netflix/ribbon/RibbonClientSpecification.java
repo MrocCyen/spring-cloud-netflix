@@ -24,10 +24,17 @@ import org.springframework.cloud.context.named.NamedContextFactory;
 /**
  * @author Dave Syer
  */
+//todo 需要用户自定实现
 public class RibbonClientSpecification implements NamedContextFactory.Specification {
 
+	/**
+	 * context名称
+	 */
 	private String name;
 
+	/**
+	 * bean类型数组
+	 */
 	private Class<?>[] configuration;
 
 	public RibbonClientSpecification() {
@@ -38,6 +45,7 @@ public class RibbonClientSpecification implements NamedContextFactory.Specificat
 		this.configuration = configuration;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -46,6 +54,7 @@ public class RibbonClientSpecification implements NamedContextFactory.Specificat
 		this.name = name;
 	}
 
+	@Override
 	public Class<?>[] getConfiguration() {
 		return configuration;
 	}

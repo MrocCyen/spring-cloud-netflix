@@ -97,12 +97,6 @@ public class RibbonAutoConfiguration {
 		return new RibbonLoadBalancerClient(springClientFactory());
 	}
 
-	/**
-	 * 重试工厂bean，在LoadBalancerAutoConfiguration之前加载
-	 *
-	 * @param clientFactory SpringClientFactory
-	 * @return
-	 */
 	@Bean
 	@ConditionalOnClass(name = "org.springframework.retry.support.RetryTemplate")
 	@ConditionalOnMissingBean

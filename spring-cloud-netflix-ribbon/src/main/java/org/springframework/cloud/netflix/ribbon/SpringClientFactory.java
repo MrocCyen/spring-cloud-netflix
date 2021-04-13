@@ -37,7 +37,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
 
 /**
- * 为每一个客户端都设置一个上下文
+ * 为每一个服务都设置一个上下文
  */
 public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecification> {
 
@@ -98,26 +98,26 @@ public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecifi
 		return instantiateWithConfig(null, clazz, config);
 	}
 
+	//todo 这个方法的写法很好，值得学习
 	static <C> C instantiateWithConfig(AnnotationConfigApplicationContext context,
 	                                   Class<C> clazz,
 	                                   IClientConfig config) {
 		C result = null;
-
 		try {
 			Constructor<C> constructor = clazz.getConstructor(IClientConfig.class);
 			result = constructor.newInstance(config);
 		} catch (Throwable e) {
 			// Ignored
 		}
-
 		if (result == null) {
+			//实例化一个类
 			result = BeanUtils.instantiateClass(clazz);
-
+			//设置参数
 			if (result instanceof IClientConfigAware) {
 				((IClientConfigAware) result).initWithNiwsConfig(config);
 			}
-
 			if (context != null) {
+				//自动注入一个bean
 				context.getAutowireCapableBeanFactory().autowireBean(result);
 			}
 		}
@@ -125,6 +125,14 @@ public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecifi
 		return result;
 	}
 
+	/**
+	 * 从容器中获取bean
+	 *
+	 * @param name 容器名称，这里传进来的一般都是服务id
+	 * @param type bean；类型
+	 * @param <C>  bean
+	 * @return bean
+	 */
 	@Override
 	public <C> C getInstance(String name, Class<C> type) {
 		//从容器中获取bean

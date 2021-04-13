@@ -23,10 +23,26 @@ import com.netflix.loadbalancer.Server;
 /**
  * @author Spencer Gibb
  */
+
+/**
+ * 用于服务检查
+ */
 public interface ServerIntrospector {
 
+	/**
+	 * 服务是否安全
+	 *
+	 * @param server
+	 * @return
+	 */
 	boolean isSecure(Server server);
 
+	/**
+	 * 获取server的元数据
+	 *
+	 * @param server
+	 * @return
+	 */
 	Map<String, String> getMetadata(Server server);
 
 }

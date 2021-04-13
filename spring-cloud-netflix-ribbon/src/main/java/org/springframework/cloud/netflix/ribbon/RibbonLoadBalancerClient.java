@@ -51,23 +51,26 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
 	@Override
 	public URI reconstructURI(ServiceInstance instance, URI original) {
 		Assert.notNull(instance, "instance can not be null");
+		//服务id
 		String serviceId = instance.getServiceId();
+		//创建一个名为serviceId的上下文，并注入到上下文中，这个上下文和当前容器中的RibbonLoadBalancerContext是不一样的
 		RibbonLoadBalancerContext context = this.clientFactory.getLoadBalancerContext(serviceId);
 
 		URI uri;
 		Server server;
 		if (instance instanceof RibbonServer) {
 			RibbonServer ribbonServer = (RibbonServer) instance;
+			//获得ribbon的server
 			server = ribbonServer.getServer();
+			//更新为安全的地址
 			uri = updateToSecureConnectionIfNeeded(original, ribbonServer);
 		} else {
-			server = new Server(instance.getScheme(), instance.getHost(),
-					instance.getPort());
+			server = new Server(instance.getScheme(), instance.getHost(), instance.getPort());
 			IClientConfig clientConfig = clientFactory.getClientConfig(serviceId);
 			ServerIntrospector serverIntrospector = serverIntrospector(serviceId);
-			uri = updateToSecureConnectionIfNeeded(original, clientConfig,
-					serverIntrospector, server);
+			uri = updateToSecureConnectionIfNeeded(original, clientConfig, serverIntrospector, server);
 		}
+		//重建url
 		return context.reconstructURIWithServer(server, uri);
 	}
 
@@ -88,13 +91,11 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
 		if (server == null) {
 			return null;
 		}
-		return new RibbonServer(serviceId, server, isSecure(server, serviceId),
-				serverIntrospector(serviceId).getMetadata(server));
+		return new RibbonServer(serviceId, server, isSecure(server, serviceId), serverIntrospector(serviceId).getMetadata(server));
 	}
 
 	@Override
-	public <T> T execute(String serviceId, LoadBalancerRequest<T> request)
-			throws IOException {
+	public <T> T execute(String serviceId, LoadBalancerRequest<T> request) throws IOException {
 		return execute(serviceId, request, null);
 	}
 
@@ -111,23 +112,20 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
 	 * @return request execution result
 	 * @throws IOException executing the request may result in an {@link IOException}
 	 */
-	public <T> T execute(String serviceId, LoadBalancerRequest<T> request, Object hint)
-			throws IOException {
+	public <T> T execute(String serviceId, LoadBalancerRequest<T> request, Object hint) throws IOException {
 		ILoadBalancer loadBalancer = getLoadBalancer(serviceId);
 		Server server = getServer(loadBalancer, hint);
 		if (server == null) {
 			throw new IllegalStateException("No instances available for " + serviceId);
 		}
-		RibbonServer ribbonServer = new RibbonServer(serviceId, server,
-				isSecure(server, serviceId),
+		RibbonServer ribbonServer = new RibbonServer(serviceId, server, isSecure(server, serviceId),
 				serverIntrospector(serviceId).getMetadata(server));
 
 		return execute(serviceId, ribbonServer, request);
 	}
 
 	@Override
-	public <T> T execute(String serviceId, ServiceInstance serviceInstance,
-	                     LoadBalancerRequest<T> request) throws IOException {
+	public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException {
 		Server server = null;
 		if (serviceInstance instanceof RibbonServer) {
 			server = ((RibbonServer) serviceInstance).getServer();
@@ -136,8 +134,7 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
 			throw new IllegalStateException("No instances available for " + serviceId);
 		}
 
-		RibbonLoadBalancerContext context = this.clientFactory
-				.getLoadBalancerContext(serviceId);
+		RibbonLoadBalancerContext context = this.clientFactory.getLoadBalancerContext(serviceId);
 		RibbonStatsRecorder statsRecorder = new RibbonStatsRecorder(context, server);
 
 		try {
@@ -157,8 +154,7 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
 	}
 
 	private ServerIntrospector serverIntrospector(String serviceId) {
-		ServerIntrospector serverIntrospector = this.clientFactory.getInstance(serviceId,
-				ServerIntrospector.class);
+		ServerIntrospector serverIntrospector = this.clientFactory.getInstance(serviceId, ServerIntrospector.class);
 		if (serverIntrospector == null) {
 			serverIntrospector = new DefaultServerIntrospector();
 		}
@@ -168,6 +164,7 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
 	private boolean isSecure(Server server, String serviceId) {
 		IClientConfig config = this.clientFactory.getClientConfig(serviceId);
 		ServerIntrospector serverIntrospector = serverIntrospector(serviceId);
+
 		return RibbonUtils.isSecure(config, serverIntrospector, server);
 	}
 
@@ -180,6 +177,7 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
 		return getServer(loadBalancer, null);
 	}
 
+	//从ILoadBalancer中获取一个服务
 	protected Server getServer(ILoadBalancer loadBalancer, Object hint) {
 		if (loadBalancer == null) {
 			return null;
@@ -188,12 +186,21 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
 		return loadBalancer.chooseServer(hint != null ? hint : "default");
 	}
 
+	/**
+	 * 获取ILoadBalancer
+	 *
+	 * @param serviceId 服务id
+	 * @return ILoadBalancer
+	 */
 	protected ILoadBalancer getLoadBalancer(String serviceId) {
 		return this.clientFactory.getLoadBalancer(serviceId);
 	}
 
 	/**
 	 * Ribbon-server-specific {@link ServiceInstance} implementation.
+	 */
+	/**
+	 * ribbon对于ServiceInstance的实现，内部包装ribbon的Server
 	 */
 	public static class RibbonServer implements ServiceInstance {
 
@@ -205,11 +212,14 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
 
 		private Map<String, String> metadata;
 
-		public RibbonServer(String serviceId, Server server) {
+		public RibbonServer(String serviceId,
+		                    Server server) {
 			this(serviceId, server, false, Collections.emptyMap());
 		}
 
-		public RibbonServer(String serviceId, Server server, boolean secure,
+		public RibbonServer(String serviceId,
+		                    Server server,
+		                    boolean secure,
 		                    Map<String, String> metadata) {
 			this.serviceId = serviceId;
 			this.server = server;

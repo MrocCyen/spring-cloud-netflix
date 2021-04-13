@@ -69,8 +69,8 @@ import static org.springframework.cloud.netflix.ribbon.RibbonUtils.updateToSecur
 // Order is important here, last should be the default, first should be optional
 // see
 // https://github.com/spring-cloud/spring-cloud-netflix/issues/2086#issuecomment-316281653
-@Import({ HttpClientConfiguration.class, OkHttpRibbonConfiguration.class,
-		RestClientRibbonConfiguration.class, HttpClientRibbonConfiguration.class })
+@Import({HttpClientConfiguration.class, OkHttpRibbonConfiguration.class,
+		RestClientRibbonConfiguration.class, HttpClientRibbonConfiguration.class})
 public class RibbonClientConfiguration {
 
 	/**
@@ -118,7 +118,7 @@ public class RibbonClientConfiguration {
 	}
 
 	private Integer getProperty(IClientConfigKey<Integer> connectTimeout,
-			int defaultConnectTimeout) {
+	                            int defaultConnectTimeout) {
 		return environment.getProperty("ribbon." + connectTimeout, Integer.class,
 				defaultConnectTimeout);
 	}
@@ -164,13 +164,15 @@ public class RibbonClientConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public ILoadBalancer ribbonLoadBalancer(IClientConfig config,
-			ServerList<Server> serverList, ServerListFilter<Server> serverListFilter,
-			IRule rule, IPing ping, ServerListUpdater serverListUpdater) {
+	                                        ServerList<Server> serverList,
+	                                        ServerListFilter<Server> serverListFilter,
+	                                        IRule rule,
+	                                        IPing ping,
+	                                        ServerListUpdater serverListUpdater) {
 		if (this.propertiesFactory.isSet(ILoadBalancer.class, name)) {
 			return this.propertiesFactory.get(ILoadBalancer.class, config, name);
 		}
-		return new ZoneAwareLoadBalancer<>(config, rule, ping, serverList,
-				serverListFilter, serverListUpdater);
+		return new ZoneAwareLoadBalancer<>(config, rule, ping, serverList, serverListFilter, serverListUpdater);
 	}
 
 	@Bean
@@ -182,13 +184,23 @@ public class RibbonClientConfiguration {
 		}
 		ZonePreferenceServerListFilter filter = new ZonePreferenceServerListFilter();
 		filter.initWithNiwsConfig(config);
+
 		return filter;
 	}
 
+	/**
+	 * 注入RibbonLoadBalancerContext bean
+	 *
+	 * @param loadBalancer ribbon的负载均衡器
+	 * @param config       ribbon的配置器
+	 * @param retryHandler ribbon的重试处理器
+	 * @return RibbonLoadBalancerContext
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public RibbonLoadBalancerContext ribbonLoadBalancerContext(ILoadBalancer loadBalancer,
-			IClientConfig config, RetryHandler retryHandler) {
+	                                                           IClientConfig config,
+	                                                           RetryHandler retryHandler) {
 		return new RibbonLoadBalancerContext(loadBalancer, config, retryHandler);
 	}
 
@@ -198,6 +210,11 @@ public class RibbonClientConfiguration {
 		return new DefaultLoadBalancerRetryHandler(config);
 	}
 
+	/**
+	 * 想当前上下文中注入ServerIntrospector，这里是DefaultServerIntrospector类型
+	 *
+	 * @return DefaultServerIntrospector
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public ServerIntrospector serverIntrospector() {
@@ -216,7 +233,7 @@ public class RibbonClientConfiguration {
 		private ServerIntrospector serverIntrospector;
 
 		protected OverrideRestClient(IClientConfig config,
-				ServerIntrospector serverIntrospector) {
+		                             ServerIntrospector serverIntrospector) {
 			super();
 			this.config = config;
 			this.serverIntrospector = serverIntrospector;

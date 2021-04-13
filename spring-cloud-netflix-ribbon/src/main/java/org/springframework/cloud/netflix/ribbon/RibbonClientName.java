@@ -32,8 +32,8 @@ import org.springframework.beans.factory.annotation.Value;
  * @author Spencer Gibb
  * @since 2.0.0
  */
-@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER,
-		ElementType.ANNOTATION_TYPE })
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER,
+		ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Value("${ribbon.client.name}")

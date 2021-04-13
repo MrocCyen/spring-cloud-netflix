@@ -51,6 +51,9 @@ public final class RibbonUtils {
 	 */
 	public static final String DEFAULT_NAMESPACE = "ribbon";
 
+	/**
+	 * 安全映射
+	 */
 	private static final Map<String, String> unsecureSchemeMapping;
 
 	static {
@@ -89,13 +92,15 @@ public final class RibbonUtils {
 	 * Determine if client is secure. If the supplied {@link IClientConfig} has the
 	 * {@link CommonClientConfigKey#IsSecure} set, return that value. Otherwise, query the
 	 * supplied {@link ServerIntrospector}.
-	 * @param config the supplied client configuration.
+	 *
+	 * @param config             the supplied client configuration.
 	 * @param serverIntrospector used to verify if the server provides secure connections
-	 * @param server to verify
+	 * @param server             to verify
 	 * @return true if the client is secure
 	 */
 	public static boolean isSecure(IClientConfig config,
-			ServerIntrospector serverIntrospector, Server server) {
+	                               ServerIntrospector serverIntrospector,
+	                               Server server) {
 		if (config != null) {
 			Boolean isSecure = config.get(CommonClientConfigKey.IsSecure);
 			if (isSecure != null) {
@@ -110,15 +115,16 @@ public final class RibbonUtils {
 	 * Replace the scheme to https if needed. If the uri doesn't start with https and
 	 * {@link #isSecure(IClientConfig, ServerIntrospector, Server)} is true, update the
 	 * scheme. This assumes the uri is already encoded to avoid double encoding.
-	 * @param uri to modify if required
-	 * @param config Ribbon {@link IClientConfig} configuration
+	 *
+	 * @param uri                to modify if required
+	 * @param config             Ribbon {@link IClientConfig} configuration
 	 * @param serverIntrospector used to verify if the server provides secure connections
-	 * @param server to verify
+	 * @param server             to verify
 	 * @return {@link URI} updated to https if necessary
 	 * @deprecated use {@link #updateToSecureConnectionIfNeeded}
 	 */
 	public static URI updateToHttpsIfNeeded(URI uri, IClientConfig config,
-			ServerIntrospector serverIntrospector, Server server) {
+	                                        ServerIntrospector serverIntrospector, Server server) {
 		return updateToSecureConnectionIfNeeded(uri, config, serverIntrospector, server);
 	}
 
@@ -127,7 +133,8 @@ public final class RibbonUtils {
 	 * {@link #unsecureSchemeMapping} map contains the uri scheme and
 	 * {@link #isSecure(IClientConfig, ServerIntrospector, Server)} is true, update the
 	 * scheme. This assumes the uri is already encoded to avoid double encoding.
-	 * @param uri to modify if required
+	 *
+	 * @param uri          to modify if required
 	 * @param ribbonServer to verify if it provides secure connections
 	 * @return {@link URI} updated if required
 	 */
@@ -139,7 +146,8 @@ public final class RibbonUtils {
 		}
 
 		if (!StringUtils.isEmpty(uri.toString())
-				&& unsecureSchemeMapping.containsKey(scheme) && ribbonServer.isSecure()) {
+				&& unsecureSchemeMapping.containsKey(scheme)
+				&& ribbonServer.isSecure()) {
 			return upgradeConnection(uri, unsecureSchemeMapping.get(scheme));
 		}
 		return uri;
@@ -150,14 +158,17 @@ public final class RibbonUtils {
 	 * {@link #unsecureSchemeMapping} map contains the uri scheme and
 	 * {@link #isSecure(IClientConfig, ServerIntrospector, Server)} is true, update the
 	 * scheme. This assumes the uri is already encoded to avoid double encoding.
-	 * @param uri to modify if required
-	 * @param config the supplied client configuration
+	 *
+	 * @param uri                to modify if required
+	 * @param config             the supplied client configuration
 	 * @param serverIntrospector used to verify if the server provides secure connections
-	 * @param server to verify
+	 * @param server             to verify
 	 * @return {@link URI} updated if required
 	 */
-	public static URI updateToSecureConnectionIfNeeded(URI uri, IClientConfig config,
-			ServerIntrospector serverIntrospector, Server server) {
+	public static URI updateToSecureConnectionIfNeeded(URI uri,
+	                                                   IClientConfig config,
+	                                                   ServerIntrospector serverIntrospector,
+	                                                   Server server) {
 		String scheme = uri.getScheme();
 
 		if (StringUtils.isEmpty(scheme)) {

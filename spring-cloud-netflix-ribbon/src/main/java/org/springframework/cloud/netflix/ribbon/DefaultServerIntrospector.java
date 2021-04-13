@@ -31,8 +31,7 @@ public class DefaultServerIntrospector implements ServerIntrospector {
 	private ServerIntrospectorProperties serverIntrospectorProperties = new ServerIntrospectorProperties();
 
 	@Autowired(required = false)
-	public void setServerIntrospectorProperties(
-			ServerIntrospectorProperties serverIntrospectorProperties) {
+	public void setServerIntrospectorProperties(ServerIntrospectorProperties serverIntrospectorProperties) {
 		this.serverIntrospectorProperties = serverIntrospectorProperties;
 	}
 

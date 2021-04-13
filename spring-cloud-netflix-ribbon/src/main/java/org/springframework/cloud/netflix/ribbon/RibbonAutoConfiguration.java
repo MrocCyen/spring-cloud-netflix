@@ -90,14 +90,10 @@ public class RibbonAutoConfiguration {
 		return factory;
 	}
 
-	/**
-	 * ribbon中LoadBalancerClient实现的bean
-	 *
-	 * @return
-	 */
 	@Bean
 	@ConditionalOnMissingBean(LoadBalancerClient.class)
 	public LoadBalancerClient loadBalancerClient() {
+		//这里是调用的springClientFactory()方法，是一个新的SpringClientFactory对象，和上面的SpringClientFactory bean不一样
 		return new RibbonLoadBalancerClient(springClientFactory());
 	}
 
@@ -114,6 +110,11 @@ public class RibbonAutoConfiguration {
 		return new RibbonLoadBalancedRetryFactory(clientFactory);
 	}
 
+	/**
+	 * 注入属性工厂
+	 *
+	 * @return PropertiesFactory
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public PropertiesFactory propertiesFactory() {

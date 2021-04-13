@@ -26,9 +26,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Rico Pahlisch
  * @author Gregor Zurowski
  */
+
+/**
+ * 服务安全参数配置
+ */
 @ConfigurationProperties("ribbon")
 public class ServerIntrospectorProperties {
 
+	/**
+	 * 哪些是安全的端口
+	 */
 	private List<Integer> securePorts = Arrays.asList(443, 8443);
 
 	public List<Integer> getSecurePorts() {

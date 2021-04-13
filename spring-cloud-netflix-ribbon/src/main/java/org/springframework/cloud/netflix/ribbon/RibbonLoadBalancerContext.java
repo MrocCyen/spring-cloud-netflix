@@ -26,6 +26,10 @@ import com.netflix.servo.monitor.Timer;
 /**
  * @author Spencer Gibb
  */
+
+/**
+ * ribbon负载均衡上下文
+ */
 public class RibbonLoadBalancerContext extends LoadBalancerContext {
 
 	public RibbonLoadBalancerContext(ILoadBalancer lb) {
@@ -36,8 +40,7 @@ public class RibbonLoadBalancerContext extends LoadBalancerContext {
 		super(lb, clientConfig);
 	}
 
-	public RibbonLoadBalancerContext(ILoadBalancer lb, IClientConfig clientConfig,
-			RetryHandler handler) {
+	public RibbonLoadBalancerContext(ILoadBalancer lb, IClientConfig clientConfig, RetryHandler handler) {
 		super(lb, clientConfig, handler);
 	}
 
@@ -53,13 +56,13 @@ public class RibbonLoadBalancerContext extends LoadBalancerContext {
 
 	@Override
 	public void noteRequestCompletion(ServerStats stats, Object response, Throwable e,
-			long responseTime) {
+	                                  long responseTime) {
 		super.noteRequestCompletion(stats, response, e, responseTime);
 	}
 
 	@Override
 	public void noteRequestCompletion(ServerStats stats, Object response, Throwable e,
-			long responseTime, RetryHandler errorHandler) {
+	                                  long responseTime, RetryHandler errorHandler) {
 		super.noteRequestCompletion(stats, response, e, responseTime, errorHandler);
 	}
 

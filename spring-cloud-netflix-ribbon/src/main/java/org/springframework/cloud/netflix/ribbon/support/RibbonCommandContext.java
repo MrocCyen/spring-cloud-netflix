@@ -40,14 +40,23 @@ public class RibbonCommandContext {
 
 	private final String uri;
 
+	/**
+	 * 可重试标志
+	 */
 	private final Boolean retryable;
 
 	private final MultiValueMap<String, String> headers;
 
 	private final MultiValueMap<String, String> params;
 
+	/**
+	 * 自定义处理器
+	 */
 	private final List<RibbonRequestCustomizer> requestCustomizers;
 
+	/**
+	 * 请求流
+	 */
 	private InputStream requestEntity;
 
 	private Long contentLength;
@@ -56,43 +65,44 @@ public class RibbonCommandContext {
 
 	/**
 	 * Kept for backwards compatibility with Spring Cloud Sleuth 1.x versions.
-	 * @param serviceId to be used with Ribbon request
-	 * @param method to be used with Ribbon request
-	 * @param uri {@link String} value of the uri to be used with Ribbon request
-	 * @param retryable determines whether the requests should be retried
-	 * @param headers to pass to the Ribbon request
-	 * @param params parameters to pass to the Ribbon request
+	 *
+	 * @param serviceId     to be used with Ribbon request
+	 * @param method        to be used with Ribbon request
+	 * @param uri           {@link String} value of the uri to be used with Ribbon request
+	 * @param retryable     determines whether the requests should be retried
+	 * @param headers       to pass to the Ribbon request
+	 * @param params        parameters to pass to the Ribbon request
 	 * @param requestEntity request content {@link InputStream}
 	 */
 	@Deprecated
 	public RibbonCommandContext(String serviceId, String method, String uri,
-			Boolean retryable, MultiValueMap<String, String> headers,
-			MultiValueMap<String, String> params, InputStream requestEntity) {
+	                            Boolean retryable, MultiValueMap<String, String> headers,
+	                            MultiValueMap<String, String> params, InputStream requestEntity) {
 		this(serviceId, method, uri, retryable, headers, params, requestEntity,
 				new ArrayList<RibbonRequestCustomizer>(), null, null);
 	}
 
 	public RibbonCommandContext(String serviceId, String method, String uri,
-			Boolean retryable, MultiValueMap<String, String> headers,
-			MultiValueMap<String, String> params, InputStream requestEntity,
-			List<RibbonRequestCustomizer> requestCustomizers) {
+	                            Boolean retryable, MultiValueMap<String, String> headers,
+	                            MultiValueMap<String, String> params, InputStream requestEntity,
+	                            List<RibbonRequestCustomizer> requestCustomizers) {
 		this(serviceId, method, uri, retryable, headers, params, requestEntity,
 				requestCustomizers, null, null);
 	}
 
 	public RibbonCommandContext(String serviceId, String method, String uri,
-			Boolean retryable, MultiValueMap<String, String> headers,
-			MultiValueMap<String, String> params, InputStream requestEntity,
-			List<RibbonRequestCustomizer> requestCustomizers, Long contentLength) {
+	                            Boolean retryable, MultiValueMap<String, String> headers,
+	                            MultiValueMap<String, String> params, InputStream requestEntity,
+	                            List<RibbonRequestCustomizer> requestCustomizers, Long contentLength) {
 		this(serviceId, method, uri, retryable, headers, params, requestEntity,
 				requestCustomizers, contentLength, null);
 	}
 
 	public RibbonCommandContext(String serviceId, String method, String uri,
-			Boolean retryable, MultiValueMap<String, String> headers,
-			MultiValueMap<String, String> params, InputStream requestEntity,
-			List<RibbonRequestCustomizer> requestCustomizers, Long contentLength,
-			Object loadBalancerKey) {
+	                            Boolean retryable, MultiValueMap<String, String> headers,
+	                            MultiValueMap<String, String> params, InputStream requestEntity,
+	                            List<RibbonRequestCustomizer> requestCustomizers, Long contentLength,
+	                            Object loadBalancerKey) {
 		Assert.notNull(serviceId, "serviceId may not be null");
 		Assert.notNull(method, "method may not be null");
 		Assert.notNull(uri, "uri may not be null");
@@ -111,11 +121,13 @@ public class RibbonCommandContext {
 		this.loadBalancerKey = loadBalancerKey;
 	}
 
+	/**
+	 * 返回uri
+	 */
 	public URI uri() {
 		try {
 			return new URI(this.uri);
-		}
-		catch (URISyntaxException e) {
+		} catch (URISyntaxException e) {
 			ReflectionUtils.rethrowRuntimeException(e);
 		}
 		return null;
@@ -123,6 +135,7 @@ public class RibbonCommandContext {
 
 	/**
 	 * Use {@link #getMethod()}.
+	 *
 	 * @return request method
 	 */
 	@Deprecated
@@ -173,8 +186,7 @@ public class RibbonCommandContext {
 						StreamUtils.copyToByteArray(requestEntity));
 			}
 			requestEntity.reset();
-		}
-		finally {
+		} finally {
 			return requestEntity;
 		}
 	}

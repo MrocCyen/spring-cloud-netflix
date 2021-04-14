@@ -36,11 +36,10 @@ import static org.springframework.cloud.netflix.ribbon.RibbonClientConfiguration
 import static org.springframework.cloud.netflix.ribbon.RibbonClientConfiguration.DEFAULT_READ_TIMEOUT;
 
 /**
- * @param <D> delegate
+ * @param <D> delegate，远程调用的客户端
  * @param <S> {@link ContextAwareRequest} subtype
  * @param <T> {@link ServiceInstanceChooser} subtype
  * @author Spencer Gibb
- *
  */
 public abstract class AbstractLoadBalancingClient<S extends ContextAwareRequest, T extends IResponse, D>
 		extends AbstractLoadBalancerAwareClient<S, T> implements ServiceInstanceChooser {
@@ -68,7 +67,7 @@ public abstract class AbstractLoadBalancingClient<S extends ContextAwareRequest,
 	}
 
 	protected AbstractLoadBalancingClient(IClientConfig config,
-			ServerIntrospector serverIntrospector) {
+	                                      ServerIntrospector serverIntrospector) {
 		super(null);
 		this.delegate = createDelegate(config);
 		this.config = config;
@@ -77,8 +76,9 @@ public abstract class AbstractLoadBalancingClient<S extends ContextAwareRequest,
 		initWithNiwsConfig(config);
 	}
 
-	protected AbstractLoadBalancingClient(D delegate, IClientConfig config,
-			ServerIntrospector serverIntrospector) {
+	protected AbstractLoadBalancingClient(D delegate,
+	                                      IClientConfig config,
+	                                      ServerIntrospector serverIntrospector) {
 		super(null);
 		this.delegate = delegate;
 		this.config = config;
@@ -99,30 +99,39 @@ public abstract class AbstractLoadBalancingClient<S extends ContextAwareRequest,
 		this.gzipPayload = ribbon.isGZipPayload(DEFAULT_GZIP_PAYLOAD);
 	}
 
+	/**
+	 * 子类实现，获取远程调用客户端
+	 *
+	 * @param config ribbon配置信息
+	 * @return 远程调用客户端
+	 */
 	protected abstract D createDelegate(IClientConfig config);
 
 	public D getDelegate() {
 		return this.delegate;
 	}
 
+	/**
+	 * 获取RequestSpecificRetryHandler
+	 */
 	@Override
 	public RequestSpecificRetryHandler getRequestSpecificRetryHandler(final S request,
-			final IClientConfig requestConfig) {
+	                                                                  final IClientConfig requestConfig) {
+		//允许重试所有的操作
 		if (this.okToRetryOnAllOperations) {
-			return new RequestSpecificRetryHandler(true, true, this.getRetryHandler(),
-					requestConfig);
+			return new RequestSpecificRetryHandler(true, true, this.getRetryHandler(), requestConfig);
 		}
-
+		//不允许重试所有操作
+		//不是get操作
 		if (!request.getContext().getMethod().equals("GET")) {
-			return new RequestSpecificRetryHandler(true, false, this.getRetryHandler(),
-					requestConfig);
-		}
-		else {
-			return new RequestSpecificRetryHandler(true, true, this.getRetryHandler(),
-					requestConfig);
+			return new RequestSpecificRetryHandler(true, false, this.getRetryHandler(), requestConfig);
+		} else {
+			//是get操作
+			return new RequestSpecificRetryHandler(true, true, this.getRetryHandler(), requestConfig);
 		}
 	}
 
+	//是否是安全的
 	protected boolean isSecure(final IClientConfig config) {
 		if (config != null) {
 			return RibbonProperties.from(config).isSecure(this.secure);
@@ -131,8 +140,9 @@ public abstract class AbstractLoadBalancingClient<S extends ContextAwareRequest,
 	}
 
 	@Override
-	protected void customizeLoadBalancerCommandBuilder(S request, IClientConfig config,
-			LoadBalancerCommand.Builder<T> builder) {
+	protected void customizeLoadBalancerCommandBuilder(S request,
+	                                                   IClientConfig config,
+	                                                   LoadBalancerCommand.Builder<T> builder) {
 		if (request.getLoadBalancerKey() != null) {
 			builder.withServerLocator(request.getLoadBalancerKey());
 		}
@@ -147,14 +157,16 @@ public abstract class AbstractLoadBalancingClient<S extends ContextAwareRequest,
 		return null;
 	}
 
+	/**
+	 * 验证服务实例正确性
+	 */
 	public void validateServiceInstance(ServiceInstance serviceInstance)
 			throws ClientException {
 		if (serviceInstance == null) {
 			throw new ClientException(
 					"Load balancer does not have available server for client: "
 							+ clientName);
-		}
-		else if (serviceInstance.getHost() == null) {
+		} else if (serviceInstance.getHost() == null) {
 			throw new ClientException("Invalid Server for: "
 					+ serviceInstance.getServiceId() + " null Host");
 		}

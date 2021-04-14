@@ -29,10 +29,17 @@ import org.springframework.util.MultiValueMap;
  * @author Spencer Gibb
  * @author Ryan Baxter
  */
+
+/**
+ * 具有ClientRequest和HttpRequest的能力
+ */
 public abstract class ContextAwareRequest extends ClientRequest implements HttpRequest {
 
 	protected final RibbonCommandContext context;
 
+	/**
+	 * 请求头
+	 */
 	private HttpHeaders httpHeaders;
 
 	public ContextAwareRequest(RibbonCommandContext context) {

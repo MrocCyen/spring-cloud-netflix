@@ -24,10 +24,20 @@ import java.util.List;
  * @param <B> Request builder type
  * @author Spencer Gibb
  */
+
+/**
+ * ribbon请求自定义器
+ */
 public interface RibbonRequestCustomizer<B> {
 
+	/**
+	 * 是否接受需要处理的类
+	 */
 	boolean accepts(Class builderClass);
 
+	/**
+	 * 自定义处理
+	 */
 	void customize(B builder);
 
 	class Runner {
@@ -38,7 +48,7 @@ public interface RibbonRequestCustomizer<B> {
 
 		@SuppressWarnings("unchecked")
 		public static void customize(List<RibbonRequestCustomizer> customizers,
-				Object builder) {
+		                             Object builder) {
 			for (RibbonRequestCustomizer customizer : customizers) {
 				if (customizer.accepts(builder.getClass())) {
 					customizer.customize(builder);

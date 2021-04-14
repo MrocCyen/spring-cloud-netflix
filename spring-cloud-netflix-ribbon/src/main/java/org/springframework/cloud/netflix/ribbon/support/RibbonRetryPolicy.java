@@ -29,6 +29,8 @@ import org.springframework.http.HttpRequest;
 import org.springframework.retry.RetryContext;
 
 /**
+ * ribbon重试策略
+ *
  * @author Ryan Baxter
  */
 public class RibbonRetryPolicy extends InterceptorRetryPolicy {
@@ -37,8 +39,10 @@ public class RibbonRetryPolicy extends InterceptorRetryPolicy {
 
 	private String serviceId;
 
-	public RibbonRetryPolicy(HttpRequest request, LoadBalancedRetryPolicy policy,
-			ServiceInstanceChooser serviceInstanceChooser, String serviceName) {
+	public RibbonRetryPolicy(HttpRequest request,
+	                         LoadBalancedRetryPolicy policy,
+	                         ServiceInstanceChooser serviceInstanceChooser,
+	                         String serviceName) {
 		super(request, policy, serviceInstanceChooser, serviceName);
 		this.request = request;
 		this.serviceId = serviceName;
@@ -69,7 +73,7 @@ public class RibbonRetryPolicy extends InterceptorRetryPolicy {
 		return context;
 	}
 
-	class RibbonRetryPolicyServiceInstance implements ServiceInstance {
+	static class RibbonRetryPolicyServiceInstance implements ServiceInstance {
 
 		private String serviceId;
 

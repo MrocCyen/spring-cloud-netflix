@@ -46,14 +46,15 @@ public @interface RibbonClient {
 	/**
 	 * Synonym for name (the name of the client).
 	 *
-	 * @see #name()
 	 * @return name of the Ribbon client
+	 * @see #name()
 	 */
 	String value() default "";
 
 	/**
 	 * The name of the ribbon client, uniquely identifying a set of client resources,
 	 * including a load balancer.
+	 *
 	 * @return name of the Ribbon client
 	 */
 	String name() default "";
@@ -63,8 +64,8 @@ public @interface RibbonClient {
 	 * <code>@Bean</code> definition for the pieces that make up the client, for instance
 	 * {@link ILoadBalancer}, {@link ServerListFilter}, {@link IRule}.
 	 *
-	 * @see RibbonClientConfiguration for the defaults
 	 * @return the custom Ribbon client configuration
+	 * @see RibbonClientConfiguration for the defaults
 	 */
 	Class<?>[] configuration() default {};
 

@@ -25,6 +25,7 @@ import javax.servlet.ServletInputStream;
 /**
  * A wrapper for {@link ServletInputStream} providing additional capabilities to allow for
  * resetting.
+ * </p>
  *
  * @author Arne Dörnbrack
  * @author Spencer Gibb

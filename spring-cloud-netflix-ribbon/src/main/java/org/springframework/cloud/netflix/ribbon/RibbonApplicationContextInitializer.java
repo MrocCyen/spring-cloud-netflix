@@ -27,8 +27,7 @@ import org.springframework.context.ApplicationListener;
  *
  * @author Biju Kunjummen
  */
-public class RibbonApplicationContextInitializer
-		implements ApplicationListener<ApplicationReadyEvent> {
+public class RibbonApplicationContextInitializer implements ApplicationListener<ApplicationReadyEvent> {
 
 	private final SpringClientFactory springClientFactory;
 
@@ -36,7 +35,7 @@ public class RibbonApplicationContextInitializer
 	private final List<String> clientNames;
 
 	public RibbonApplicationContextInitializer(SpringClientFactory springClientFactory,
-			List<String> clientNames) {
+	                                           List<String> clientNames) {
 		this.springClientFactory = springClientFactory;
 		this.clientNames = clientNames;
 	}

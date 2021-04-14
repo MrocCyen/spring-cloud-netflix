@@ -55,6 +55,7 @@ public class RibbonLoadBalancingHttpClient extends
 		super(delegate, config, serverIntrospector);
 	}
 
+	@Override
 	protected CloseableHttpClient createDelegate(IClientConfig config) {
 		RibbonProperties ribbon = RibbonProperties.from(config);
 		return HttpClientBuilder.create()

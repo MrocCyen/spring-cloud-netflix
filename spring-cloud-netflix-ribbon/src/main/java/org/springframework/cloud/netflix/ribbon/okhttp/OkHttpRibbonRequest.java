@@ -95,7 +95,7 @@ public class OkHttpRibbonRequest extends ContextAwareRequest implements Cloneabl
 		private Long contentLength;
 
 		InputStreamRequestBody(InputStream inputStream, MediaType mediaType,
-				Long contentLength) {
+		                       Long contentLength) {
 			this.inputStream = inputStream;
 			this.mediaType = mediaType;
 			this.contentLength = contentLength;
@@ -113,8 +113,7 @@ public class OkHttpRibbonRequest extends ContextAwareRequest implements Cloneabl
 			}
 			try {
 				return inputStream.available();
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				return 0;
 			}
 		}
@@ -125,8 +124,7 @@ public class OkHttpRibbonRequest extends ContextAwareRequest implements Cloneabl
 			try {
 				source = Okio.source(inputStream);
 				sink.writeAll(source);
-			}
-			finally {
+			} finally {
 				if (source != null) {
 					source.close();
 				}

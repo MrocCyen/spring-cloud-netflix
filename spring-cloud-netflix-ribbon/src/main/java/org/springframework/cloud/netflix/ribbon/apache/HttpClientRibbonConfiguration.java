@@ -128,7 +128,7 @@ public class HttpClientRibbonConfiguration {
 		@Bean
 		@ConditionalOnMissingBean(CloseableHttpClient.class)
 		public CloseableHttpClient httpClient(ApacheHttpClientFactory httpClientFactory,
-				HttpClientConnectionManager connectionManager, IClientConfig config) {
+		                                      HttpClientConnectionManager connectionManager, IClientConfig config) {
 			RibbonProperties ribbon = RibbonProperties.from(config);
 			Boolean followRedirects = ribbon.isFollowRedirects();
 			Integer connectTimeout = ribbon.connectTimeout();

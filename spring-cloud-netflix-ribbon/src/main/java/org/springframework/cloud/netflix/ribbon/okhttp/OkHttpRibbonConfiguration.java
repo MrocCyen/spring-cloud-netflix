@@ -56,13 +56,14 @@ public class OkHttpRibbonConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(AbstractLoadBalancerAwareClient.class)
 	@ConditionalOnClass(name = "org.springframework.retry.support.RetryTemplate")
-	public RetryableOkHttpLoadBalancingClient retryableOkHttpLoadBalancingClient(
-			IClientConfig config, ServerIntrospector serverIntrospector,
-			ILoadBalancer loadBalancer, RetryHandler retryHandler,
-			LoadBalancedRetryFactory loadBalancedRetryFactory, OkHttpClient delegate,
-			RibbonLoadBalancerContext ribbonLoadBalancerContext) {
-		RetryableOkHttpLoadBalancingClient client = new RetryableOkHttpLoadBalancingClient(
-				delegate, config, serverIntrospector, loadBalancedRetryFactory);
+	public RetryableOkHttpLoadBalancingClient retryableOkHttpLoadBalancingClient(IClientConfig config,
+	                                                                             ServerIntrospector serverIntrospector,
+	                                                                             ILoadBalancer loadBalancer,
+	                                                                             RetryHandler retryHandler,
+	                                                                             LoadBalancedRetryFactory loadBalancedRetryFactory,
+	                                                                             OkHttpClient delegate,
+	                                                                             RibbonLoadBalancerContext ribbonLoadBalancerContext) {
+		RetryableOkHttpLoadBalancingClient client = new RetryableOkHttpLoadBalancingClient(delegate, config, serverIntrospector, loadBalancedRetryFactory);
 		client.setLoadBalancer(loadBalancer);
 		client.setRetryHandler(retryHandler);
 		client.setRibbonLoadBalancerContext(ribbonLoadBalancerContext);
@@ -74,10 +75,11 @@ public class OkHttpRibbonConfiguration {
 	@ConditionalOnMissingBean(AbstractLoadBalancerAwareClient.class)
 	@ConditionalOnMissingClass("org.springframework.retry.support.RetryTemplate")
 	public OkHttpLoadBalancingClient okHttpLoadBalancingClient(IClientConfig config,
-			ServerIntrospector serverIntrospector, ILoadBalancer loadBalancer,
-			RetryHandler retryHandler, OkHttpClient delegate) {
-		OkHttpLoadBalancingClient client = new OkHttpLoadBalancingClient(delegate, config,
-				serverIntrospector);
+	                                                           ServerIntrospector serverIntrospector,
+	                                                           ILoadBalancer loadBalancer,
+	                                                           RetryHandler retryHandler,
+	                                                           OkHttpClient delegate) {
+		OkHttpLoadBalancingClient client = new OkHttpLoadBalancingClient(delegate, config, serverIntrospector);
 		client.setLoadBalancer(loadBalancer);
 		client.setRetryHandler(retryHandler);
 		Monitors.registerObject("Client_" + this.name, client);
@@ -92,7 +94,7 @@ public class OkHttpRibbonConfiguration {
 		@Bean
 		@ConditionalOnMissingBean(ConnectionPool.class)
 		public ConnectionPool httpClientConnectionPool(IClientConfig config,
-				OkHttpClientConnectionPoolFactory connectionPoolFactory) {
+		                                               OkHttpClientConnectionPoolFactory connectionPoolFactory) {
 			RibbonProperties ribbon = RibbonProperties.from(config);
 			int maxTotalConnections = ribbon.maxTotalConnections();
 			long timeToLive = ribbon.poolKeepAliveTime();
@@ -103,13 +105,15 @@ public class OkHttpRibbonConfiguration {
 		@Bean
 		@ConditionalOnMissingBean(OkHttpClient.class)
 		public OkHttpClient client(OkHttpClientFactory httpClientFactory,
-				ConnectionPool connectionPool, IClientConfig config) {
+		                           ConnectionPool connectionPool,
+		                           IClientConfig config) {
 			RibbonProperties ribbon = RibbonProperties.from(config);
 			this.httpClient = httpClientFactory.createBuilder(false)
 					.connectTimeout(ribbon.connectTimeout(), TimeUnit.MILLISECONDS)
 					.readTimeout(ribbon.readTimeout(), TimeUnit.MILLISECONDS)
 					.followRedirects(ribbon.isFollowRedirects())
 					.connectionPool(connectionPool).build();
+
 			return this.httpClient;
 		}
 

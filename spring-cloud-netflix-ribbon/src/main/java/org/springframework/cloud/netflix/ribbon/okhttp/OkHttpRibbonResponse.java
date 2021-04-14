@@ -94,8 +94,7 @@ public class OkHttpRibbonResponse implements com.netflix.client.http.HttpRespons
 			for (String value : entry.getValue()) {
 				if (headers.containsKey(name)) {
 					headers.get(name).add(value);
-				}
-				else {
+				} else {
 					final List<String> values = new ArrayList<>();
 					values.add(value);
 					headers.put(name, values);

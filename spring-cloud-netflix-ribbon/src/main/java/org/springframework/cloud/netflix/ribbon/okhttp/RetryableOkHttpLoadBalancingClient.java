@@ -66,9 +66,10 @@ public class RetryableOkHttpLoadBalancingClient extends OkHttpLoadBalancingClien
 
 	private RibbonLoadBalancerContext ribbonLoadBalancerContext;
 
-	public RetryableOkHttpLoadBalancingClient(OkHttpClient delegate, IClientConfig config,
-			ServerIntrospector serverIntrospector,
-			LoadBalancedRetryFactory loadBalancedRetryPolicyFactory) {
+	public RetryableOkHttpLoadBalancingClient(OkHttpClient delegate,
+	                                          IClientConfig config,
+	                                          ServerIntrospector serverIntrospector,
+	                                          LoadBalancedRetryFactory loadBalancedRetryPolicyFactory) {
 		super(delegate, config, serverIntrospector);
 		this.loadBalancedRetryFactory = loadBalancedRetryPolicyFactory;
 	}
@@ -86,21 +87,19 @@ public class RetryableOkHttpLoadBalancingClient extends OkHttpLoadBalancingClien
 	}
 
 	private OkHttpRibbonResponse executeWithRetry(OkHttpRibbonRequest request,
-			LoadBalancedRetryPolicy retryPolicy,
-			RetryCallback<OkHttpRibbonResponse, Exception> callback,
-			RecoveryCallback<OkHttpRibbonResponse> recoveryCallback) throws Exception {
+	                                              LoadBalancedRetryPolicy retryPolicy,
+	                                              RetryCallback<OkHttpRibbonResponse, Exception> callback,
+	                                              RecoveryCallback<OkHttpRibbonResponse> recoveryCallback) throws Exception {
 		RetryTemplate retryTemplate = new RetryTemplate();
-		BackOffPolicy backOffPolicy = loadBalancedRetryFactory
-				.createBackOffPolicy(this.getClientName());
-		retryTemplate.setBackOffPolicy(
-				backOffPolicy == null ? new NoBackOffPolicy() : backOffPolicy);
-		RetryListener[] retryListeners = this.loadBalancedRetryFactory
-				.createRetryListeners(this.getClientName());
+		BackOffPolicy backOffPolicy = loadBalancedRetryFactory.createBackOffPolicy(this.getClientName());
+		retryTemplate.setBackOffPolicy(backOffPolicy == null ? new NoBackOffPolicy() : backOffPolicy);
+		RetryListener[] retryListeners = this.loadBalancedRetryFactory.createRetryListeners(this.getClientName());
 		if (retryListeners != null && retryListeners.length != 0) {
 			retryTemplate.setListeners(retryListeners);
 		}
 		boolean retryable = isRequestRetryable(request);
-		retryTemplate.setRetryPolicy(retryPolicy == null || !retryable
+		retryTemplate.setRetryPolicy(retryPolicy == null
+				|| !retryable
 				? new NeverRetryPolicy()
 				: new RetryPolicy(request, retryPolicy, this, this.getClientName()));
 		return retryTemplate.execute(callback, recoveryCallback);
@@ -108,68 +107,62 @@ public class RetryableOkHttpLoadBalancingClient extends OkHttpLoadBalancingClien
 
 	@Override
 	public OkHttpRibbonResponse execute(final OkHttpRibbonRequest ribbonRequest,
-			final IClientConfig configOverride) throws Exception {
-		final LoadBalancedRetryPolicy retryPolicy = loadBalancedRetryFactory
-				.createRetryPolicy(this.getClientName(), this);
-		RetryCallback<OkHttpRibbonResponse, Exception> retryCallback = new RetryCallback<OkHttpRibbonResponse, Exception>() {
-			@Override
-			public OkHttpRibbonResponse doWithRetry(RetryContext context)
-					throws Exception {
-				// on retries the policy will choose the server and set it in the context
-				// extract the server and update the request being made
-				OkHttpRibbonRequest newRequest = ribbonRequest;
-				RibbonStatsRecorder statsRecorder = null;
+	                                    final IClientConfig configOverride) throws Exception {
+		final LoadBalancedRetryPolicy retryPolicy = loadBalancedRetryFactory.createRetryPolicy(this.getClientName(), this);
+		RetryCallback<OkHttpRibbonResponse, Exception> retryCallback = context -> {
+			// on retries the policy will choose the server and set it in the context
+			// extract the server and update the request being made
+			OkHttpRibbonRequest newRequest = ribbonRequest;
+			RibbonStatsRecorder statsRecorder = null;
 
-				if (context instanceof LoadBalancedRetryContext) {
-					ServiceInstance service = ((LoadBalancedRetryContext) context)
-							.getServiceInstance();
-					validateServiceInstance(service);
-					// Reconstruct the request URI using the host and port set in the
-					// retry context
-					newRequest = newRequest
-							.withNewUri(new URI(service.getUri().getScheme(),
-									newRequest.getURI().getUserInfo(), service.getHost(),
-									service.getPort(), newRequest.getURI().getPath(),
-									newRequest.getURI().getQuery(),
-									newRequest.getURI().getFragment()));
+			if (context instanceof LoadBalancedRetryContext) {
+				ServiceInstance service = ((LoadBalancedRetryContext) context)
+						.getServiceInstance();
+				validateServiceInstance(service);
+				// Reconstruct the request URI using the host and port set in the
+				// retry context
+				newRequest = newRequest
+						.withNewUri(new URI(service.getUri().getScheme(),
+								newRequest.getURI().getUserInfo(), service.getHost(),
+								service.getPort(), newRequest.getURI().getPath(),
+								newRequest.getURI().getQuery(),
+								newRequest.getURI().getFragment()));
 
-					if (ribbonLoadBalancerContext == null) {
-						LOGGER.error(
-								"RibbonLoadBalancerContext is null. Unable to update load balancer stats");
-					}
-					else if (service instanceof RibbonServer) {
-						statsRecorder = new RibbonStatsRecorder(ribbonLoadBalancerContext,
-								((RibbonServer) service).getServer());
-					}
+				if (ribbonLoadBalancerContext == null) {
+					LOGGER.error(
+							"RibbonLoadBalancerContext is null. Unable to update load balancer stats");
+				} else if (service instanceof RibbonServer) {
+					statsRecorder = new RibbonStatsRecorder(ribbonLoadBalancerContext,
+							((RibbonServer) service).getServer());
 				}
-				if (isSecure(configOverride)) {
-					final URI secureUri = UriComponentsBuilder
-							.fromUri(newRequest.getUri()).scheme("https").build().toUri();
-					newRequest = newRequest.withNewUri(secureUri);
-				}
-				OkHttpClient httpClient = getOkHttpClient(configOverride, secure);
-
-				final Request request = newRequest.toRequest();
-				Response response = httpClient.newCall(request).execute();
-				if (retryPolicy.retryableStatusCode(response.code())) {
-					ResponseBody responseBody = response.peekBody(Integer.MAX_VALUE);
-					response.close();
-					throw new OkHttpStatusCodeException(
-							RetryableOkHttpLoadBalancingClient.this.clientName, response,
-							responseBody, newRequest.getURI());
-				}
-				if (statsRecorder != null) {
-					statsRecorder.recordStats(response);
-				}
-				return new OkHttpRibbonResponse(response, newRequest.getUri());
 			}
+			if (isSecure(configOverride)) {
+				final URI secureUri = UriComponentsBuilder
+						.fromUri(newRequest.getUri()).scheme("https").build().toUri();
+				newRequest = newRequest.withNewUri(secureUri);
+			}
+			OkHttpClient httpClient = getOkHttpClient(configOverride, secure);
+
+			final Request request = newRequest.toRequest();
+			Response response = httpClient.newCall(request).execute();
+			if (retryPolicy.retryableStatusCode(response.code())) {
+				ResponseBody responseBody = response.peekBody(Integer.MAX_VALUE);
+				response.close();
+				throw new OkHttpStatusCodeException(
+						RetryableOkHttpLoadBalancingClient.this.clientName, response,
+						responseBody, newRequest.getURI());
+			}
+			if (statsRecorder != null) {
+				statsRecorder.recordStats(response);
+			}
+			return new OkHttpRibbonResponse(response, newRequest.getUri());
 		};
 		return this.executeWithRetry(ribbonRequest, retryPolicy, retryCallback,
 				new LoadBalancedRecoveryCallback<OkHttpRibbonResponse, Response>() {
 
 					@Override
 					protected OkHttpRibbonResponse createResponse(Response response,
-							URI uri) {
+					                                              URI uri) {
 						return new OkHttpRibbonResponse(response, uri);
 					}
 				});
@@ -189,7 +182,7 @@ public class RetryableOkHttpLoadBalancingClient extends OkHttpLoadBalancingClien
 	static class RetryPolicy extends InterceptorRetryPolicy {
 
 		RetryPolicy(HttpRequest request, LoadBalancedRetryPolicy policy,
-				ServiceInstanceChooser serviceInstanceChooser, String serviceName) {
+		            ServiceInstanceChooser serviceInstanceChooser, String serviceName) {
 			super(request, policy, serviceInstanceChooser, serviceName);
 		}
 

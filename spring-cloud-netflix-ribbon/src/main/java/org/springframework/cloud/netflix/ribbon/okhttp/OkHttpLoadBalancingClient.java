@@ -37,16 +37,16 @@ import static org.springframework.cloud.netflix.ribbon.RibbonUtils.updateToSecur
  * @author Ryan Baxter
  * @author Tim Ysewyn
  */
-public class OkHttpLoadBalancingClient extends
-		AbstractLoadBalancingClient<OkHttpRibbonRequest, OkHttpRibbonResponse, OkHttpClient> {
+public class OkHttpLoadBalancingClient extends AbstractLoadBalancingClient<OkHttpRibbonRequest, OkHttpRibbonResponse, OkHttpClient> {
 
 	public OkHttpLoadBalancingClient(IClientConfig config,
-			ServerIntrospector serverIntrospector) {
+	                                 ServerIntrospector serverIntrospector) {
 		super(config, serverIntrospector);
 	}
 
-	public OkHttpLoadBalancingClient(OkHttpClient delegate, IClientConfig config,
-			ServerIntrospector serverIntrospector) {
+	public OkHttpLoadBalancingClient(OkHttpClient delegate,
+	                                 IClientConfig config,
+	                                 ServerIntrospector serverIntrospector) {
 		super(delegate, config, serverIntrospector);
 	}
 
@@ -57,7 +57,7 @@ public class OkHttpLoadBalancingClient extends
 
 	@Override
 	public OkHttpRibbonResponse execute(OkHttpRibbonRequest ribbonRequest,
-			final IClientConfig configOverride) throws Exception {
+	                                    final IClientConfig configOverride) throws Exception {
 		boolean secure = isSecure(configOverride);
 		if (secure) {
 			final URI secureUri = UriComponentsBuilder.fromUri(ribbonRequest.getUri())

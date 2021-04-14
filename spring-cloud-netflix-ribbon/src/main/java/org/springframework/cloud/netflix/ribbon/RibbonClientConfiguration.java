@@ -155,6 +155,7 @@ public class RibbonClientConfiguration {
 
 	/**
 	 * ribbon的ServerList<Server>，这里是ConfigurationBasedServerList
+	 * todo，这里是获取服务器列表的，用户可以实现这个ServerList，然后在这个类之前注入到容器中
 	 */
 	@Bean
 	@ConditionalOnMissingBean

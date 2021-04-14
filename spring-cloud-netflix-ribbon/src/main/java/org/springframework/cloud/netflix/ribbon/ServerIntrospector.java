@@ -25,7 +25,7 @@ import com.netflix.loadbalancer.Server;
  */
 
 /**
- * 用于服务检查
+ * 用于服务检查，主要是判断是否是服务安全的，http，https，ws，wss
  */
 public interface ServerIntrospector {
 

@@ -45,50 +45,64 @@ public class RibbonLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy {
 	/**
 	 * Retrayable status codes config key.
 	 */
-	public static final IClientConfigKey<String> RETRYABLE_STATUS_CODES = new CommonClientConfigKey<String>(
-			"retryableStatusCodes") {
+	public static final IClientConfigKey<String> RETRYABLE_STATUS_CODES = new CommonClientConfigKey<String>("retryableStatusCodes") {
 	};
 
 	private static final Log log = LogFactory.getLog(RibbonLoadBalancedRetryPolicy.class);
 
+	/**
+	 * 相同服务实例数量
+	 */
 	private int sameServerCount = 0;
 
+	/**
+	 * 下一个服务实例数量
+	 */
 	private int nextServerCount = 0;
 
+	/**
+	 * 服务id
+	 */
 	private String serviceId;
 
 	private RibbonLoadBalancerContext lbContext;
 
+	/**
+	 * 服务选择器
+	 */
 	private ServiceInstanceChooser loadBalanceChooser;
 
+	/**
+	 * 可重试的状态码
+	 */
 	List<Integer> retryableStatusCodes = new ArrayList<>();
 
-	private static final Log LOGGER = LogFactory
-			.getLog(RibbonLoadBalancedRetryPolicy.class);
+	private static final Log LOGGER = LogFactory.getLog(RibbonLoadBalancedRetryPolicy.class);
 
 	public RibbonLoadBalancedRetryPolicy(String serviceId,
-			RibbonLoadBalancerContext context,
-			ServiceInstanceChooser loadBalanceChooser) {
+	                                     RibbonLoadBalancerContext context,
+	                                     ServiceInstanceChooser loadBalanceChooser) {
 		this.serviceId = serviceId;
 		this.lbContext = context;
 		this.loadBalanceChooser = loadBalanceChooser;
 	}
 
 	public RibbonLoadBalancedRetryPolicy(String serviceId,
-			RibbonLoadBalancerContext context, ServiceInstanceChooser loadBalanceChooser,
-			IClientConfig clientConfig) {
+	                                     RibbonLoadBalancerContext context,
+	                                     ServiceInstanceChooser loadBalanceChooser,
+	                                     IClientConfig clientConfig) {
 		this.serviceId = serviceId;
 		this.lbContext = context;
 		this.loadBalanceChooser = loadBalanceChooser;
-		String retryableStatusCodesProp = clientConfig
-				.getPropertyAsString(RETRYABLE_STATUS_CODES, "");
+		//获取可重试的状态码
+		String retryableStatusCodesProp = clientConfig.getPropertyAsString(RETRYABLE_STATUS_CODES, "");
 		String[] retryableStatusCodesArray = retryableStatusCodesProp.split(",");
 		for (String code : retryableStatusCodesArray) {
 			if (!StringUtils.isEmpty(code)) {
 				try {
+					//保存
 					retryableStatusCodes.add(Integer.valueOf(code.trim()));
-				}
-				catch (NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					log.warn("We cant add the status code because the code [ " + code
 							+ " ] could not be converted to an integer. ", e);
 				}
@@ -98,6 +112,7 @@ public class RibbonLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy {
 
 	public boolean canRetry(LoadBalancedRetryContext context) {
 		HttpMethod method = context.getRequest().getMethod();
+		//get请求或者可以重试所有操作设置成true时，返回值是true
 		return HttpMethod.GET == method || lbContext.isOkToRetryOnAllOperations();
 	}
 
@@ -149,8 +164,7 @@ public class RibbonLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy {
 			if (!canRetryNextServer(context)) {
 				context.setExhaustedOnly();
 			}
-		}
-		else {
+		} else {
 			sameServerCount++;
 		}
 

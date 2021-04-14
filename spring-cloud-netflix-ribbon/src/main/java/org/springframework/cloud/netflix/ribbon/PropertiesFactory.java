@@ -37,7 +37,7 @@ import static org.springframework.cloud.netflix.ribbon.SpringClientFactory.NAMES
  */
 
 /**
- * 属性工厂，用户自定义的，todo
+ * 属性工厂，用户自定义的，todo，判断环境中是否有值，没有的话，在配置类中会new一个出来
  */
 public class PropertiesFactory {
 

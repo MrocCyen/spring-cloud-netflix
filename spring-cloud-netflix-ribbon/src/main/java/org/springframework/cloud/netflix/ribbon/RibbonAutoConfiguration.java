@@ -101,6 +101,7 @@ public class RibbonAutoConfiguration {
 	@ConditionalOnClass(name = "org.springframework.retry.support.RetryTemplate")
 	@ConditionalOnMissingBean
 	public LoadBalancedRetryFactory loadBalancedRetryPolicyFactory(final SpringClientFactory clientFactory) {
+		//注入容器中的SpringClientFactory bean
 		return new RibbonLoadBalancedRetryFactory(clientFactory);
 	}
 
